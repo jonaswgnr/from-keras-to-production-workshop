@@ -1,28 +1,30 @@
 import fire
+import cv2
+import json
 
-
-def preprocess(inpath, outpath):
-    import cv2
-    img = cv2.imread(inpath, cv2.IMREAD_COLOR)
-    larger = cv2.resize(img, (100,100))
-    gray = cv2.cvtColor(larger, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite(outpath, gray)
-
+def preprocess(inputPicture, outputPicture):
+    img = cv2.imread(inputPicture, cv2.IMREAD_COLOR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.resize(img, (100,100))
+    cv2.imwrite(outputPicture, img)
+    print("Finished")
     
-def classify(inpath, outpath):
-    import cv2
-    import json
-    img = cv2.imread(inpath, cv2.IMREAD_GRAYSCALE)
+def classify(picture, result):
+    img = cv2.imread(picture, cv2.IMREAD_GRAYSCALE)
     circles = cv2.HoughCircles(img, 
                                cv2.HOUGH_GRADIENT,
                                dp=2, 
                                minDist=15, 
                                param1=100, 
                                param2=70)
-    label = "lemon" if circles is not None else "banana"
-    with open(outpath, "w") as out:
-        json.dump({"class": label}, out)
     
+    if circles is None:
+        fruit="banana"
+    else:
+        fruit="lemon"
+        
+    with open(result,"w") as out:
+            json.dump({"class": fruit}, out)
 
 if __name__ == '__main__':
-  fire.Fire()
+    fire.Fire()
